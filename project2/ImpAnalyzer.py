@@ -1,6 +1,6 @@
 import sys
 from IMP.imp import create_ast
-from IMP.imp_ast import Statement, StatementType
+from IMP.imp_ast import *
 
 if len(sys.argv) != 2:
     print(f"Usage: python {sys.argv[0]} <file_path>")
@@ -14,19 +14,19 @@ def generate_model(ast: Statement):
     model = {}
 
     # Switch or match statement
-    match ast.type():
-        case StatementType.ASSIGN:
-            pass
-        case StatementType.ITE:
-            pass
-        case StatementType.WHILE:
-            pass
-        case StatementType.SKIP:
-            pass
-        case StatementType.SEQ:
-            pass
-        case _:
-            raise Exception("Invalid statement type")
+    if isinstance(ast, Sequence):
+        model_l = generate_model(ast.first)
+        model_r = generate_model(ast.second)
+    elif isinstance(ast, Ite):
+        pass
+    elif isinstance(ast, While):
+        pass
+    elif isinstance(ast, Assignment):
+        pass
+    elif isinstance(ast, Skip):
+        pass
+    else:
+        raise Exception(f"Unknown statement type: {ast}")
 
     return model
 
