@@ -3,7 +3,6 @@ from IMP.imp import create_ast
 from IMP.imp_ast import *
 
 PREAMBLE = """
-(set-option :produce-unsat-cores true)
 (declare-datatypes (T1 T2) ((Pair (mk-pair (first T1) (second T2)))))
 
 (declare-fun EN (Lines (Pair Vars Lines)) Bool)
@@ -105,12 +104,6 @@ PREAMBLE = """
 
 (check-sat)"""
 
-if len(sys.argv) != 2:
-    print(f"Usage: python {sys.argv[0]} <file_path>")
-    sys.exit(1)
-
-file_path = sys.argv[1]
-
 
 def generate_model(
     ast: Statement, start_line: int, cur_model: dict[int, str]
@@ -165,12 +158,12 @@ def generate_model(
         # The start_line can flow into the loop, or past the end
         ret_model[
             start_line
-        ] += f"\n(assert (forall ((l Lines)) (iff (or (= l l{start_line + 1}) (= l l{ret_end_line})) (Flows l{start_line} l)))"
+        ] += f"\n(assert (forall ((l Lines)) (iff (or (= l l{start_line + 1}) (= l l{ret_end_line})) (Flows l{start_line} l))))"
         ## The EXIT of while should flow into the start of the loop,
         ## or past the end
         ret_model[
             ret_end_line - 1
-        ] += f"\n(assert (forall ((l Lines)) (iff (or (= l l{start_line}) (= l l{ret_end_line})) (Flows l{ret_end_line - 1} l)))"
+        ] += f"\n(assert (forall ((l Lines)) (iff (or (= l l{start_line}) (= l l{ret_end_line})) (Flows l{ret_end_line - 1} l))))"
         # TODO: (assert (forall ((l Lines)) (iff (or (= l BEFORE_START) (= l END_BODY)) (Flows l START))))
         ## Adding magic skip at end
         ret_model[ret_end_line] = f"(assert (NOT_ASGN l{ret_end_line}))"
@@ -192,19 +185,48 @@ def generate_model(
     return ret_end_line, ret_model
 
 
+def get_all_vars_aexp(ast: Aexp) -> set[str]:
+    if isinstance(ast, IntAexp):
+        return set()
+    elif isinstance(ast, VarAexp):
+        return set([ast.name])
+    elif isinstance(ast, BinopAexp):
+        ret_set = get_all_vars_aexp(ast.left)
+        return ret_set.union(get_all_vars_aexp(ast.right))
+    else:
+        raise Exception(f"Unknown aexp type: {ast}")
+
+
+def get_all_vars_bexp(ast: Bexp) -> set[str]:
+    if isinstance(ast, AndBexp):
+        ret_set = get_all_vars_bexp(ast.left)
+        return ret_set.union(get_all_vars_bexp(ast.right))
+    elif isinstance(ast, OrBexp):
+        ret_set = get_all_vars_bexp(ast.left)
+        return ret_set.union(get_all_vars_bexp(ast.right))
+    elif isinstance(ast, NotBexp):
+        return get_all_vars_bexp(ast.exp)
+    elif isinstance(ast, RelopBexp):
+        ret_set = get_all_vars_aexp(ast.left)
+        return ret_set.union(get_all_vars_aexp(ast.right))
+    else:
+        raise Exception(f"Unknown bexp type: {ast}")
+
+
 def get_all_vars(ast: Statement) -> set[str]:
     if isinstance(ast, Sequence):
         ret_set = get_all_vars(ast.first)
-        ret_set.union(get_all_vars(ast.second))
-        return ret_set
+        return ret_set.union(get_all_vars(ast.second))
     elif isinstance(ast, Ite):
-        ret_set = get_all_vars(ast.true_stmt)
-        ret_set.union(get_all_vars(ast.false_stmt))
-        return ret_set
+        ret_set = get_all_vars_bexp(ast.condition)
+        ret_set = ret_set.union(get_all_vars(ast.true_stmt))
+        return ret_set.union(get_all_vars(ast.false_stmt))
     elif isinstance(ast, While):
-        return get_all_vars(ast.body)
+        ret_set = get_all_vars_bexp(ast.condition)
+        return ret_set.union(get_all_vars(ast.body))
     elif isinstance(ast, Assignment):
-        return set([ast.name])
+        ret_set = set([ast.name])
+        return ret_set.union(get_all_vars_aexp(ast.aexp))
     elif isinstance(ast, Skip):
         return set()
     else:
@@ -213,8 +235,8 @@ def get_all_vars(ast: Statement) -> set[str]:
 
 def generate_model_top(ast: Statement) -> str:
     preamble = PREAMBLE
-    last_line, model = generate_model(ast, 1, {})
     vars = get_all_vars(ast)
+    last_line, model = generate_model(ast, 1, {})
     var_decl = f"(declare-datatypes () ((Vars {' '.join(vars)})))"
     lines_decl = (
         f"(declare-datatypes () ((Lines l? "
@@ -228,12 +250,29 @@ def generate_model_top(ast: Statement) -> str:
         + "\n"
         + preamble
         + "\n"
+        + "(assert (forall ((l Lines)) (iff (= l l1) (Flows l? l))))\n"
         + "\n".join(model.values())
+        + f"\n(assert (forall ((l Lines)) (not (Flows l{last_line - 1} l))))"
+        + "\n(check-sat)\n(get-model)"
     )
 
     return ret_val
 
 
-ast = create_ast(file_path)
-print(ast.to_str(0))
-print(generate_model_top(ast))
+def main():
+    if len(sys.argv) != 3:
+        print(f"Usage: python {sys.argv[0]} <in_file_path> <out_file_path>")
+        sys.exit(1)
+
+    in_file_path = sys.argv[1]
+    out_file_path = sys.argv[2]
+
+    ast = create_ast(in_file_path)
+    # print(ast.to_str(0))
+    with open(out_file_path, "w") as fd:
+        fd.write(generate_model_top(ast))
+    print("Done")
+
+
+if __name__ == "__main__":
+    main()

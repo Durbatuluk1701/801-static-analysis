@@ -239,7 +239,7 @@ class BinopAexp(Aexp):
 
 
 class RelopBexp(Bexp):
-    def __init__(self, op: str, left: Bexp, right: Bexp):
+    def __init__(self, op: str, left: Aexp, right: Aexp):
         self.op = op
         self.left = left
         self.right = right
