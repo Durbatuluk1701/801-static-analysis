@@ -10,25 +10,8 @@
 (define-fun ASGN ((v Vars) (l Lines)) Bool
 ; ASGN v l -> (forall v' l'; v <> v' -> (EN l (v', l') = EX l (v', l')))
 ; ASGN v l -> (forall l'; l = l' <-> EX l (v, l'))
-  (=> 
-    (not (= l l?))
-    (forall ((v2 Vars) (l_3 Lines)) 
-      (ite 
-        (= v v2)
-        (iff (= l l_3) (EX l (mk-pair v2 l_3)))
-        (iff (EN l (mk-pair v2 l_3)) (EX l (mk-pair v2 l_3)))
-      )
-    )
-  )
-)
-
-(define-fun NOT_ASGN ((l Lines)) Bool
-; NOT_ASGN l -> (forall v2 l2, EN l (v2,l2) = EX l (v2,l2))
-  (implies (not (= l l?))
-    (and
-      ;(forall ((val (Pair Vars Lines))) (= (EN l val) (EX l val)))
-      (forall ((v Vars)) (not (ASGN v l)))
-    )
+  (forall ((l_3 Lines)) 
+    (iff (= l l_3) (EX l (mk-pair v l_3)))
   )
 )
 
@@ -39,6 +22,11 @@
       (forall ((l_2 Lines)) (= (EN l_1 (mk-pair v l_2)) (EX l_1 (mk-pair v l_2))))
     )
   )
+)
+
+(define-fun NOT_ASGN ((l Lines)) Bool
+; NOT_ASGN l -> (forall v2 l2, EN l (v2,l2) = EX l (v2,l2))
+  (forall ((v Vars)) (not (ASGN v l)))
 )
 
 (declare-fun Flows (Lines Lines) Bool)
@@ -133,10 +121,7 @@
 (assert (forall ((l Lines)) (not (Flows l6 l))))
 (assert (forall ((l_1 Lines) (l_2 Lines)) (implies (Flows l_1 l_2) (not (= l_1 l_2)))))
 ;;;;;; ASGNs
-;;;; Pre Conditions Asgns
-; (assert (forall ((v Vars) (l Lines)) (= (= l l?) (EN l1 (mk-pair v l)))))
-; (assert (forall ((v Vars) (l Lines)) (implies (not (= v Y)) (= (= l l?) (EX l1 (mk-pair v l))))))
-; ;;;; Program Asgns
+;;;; Program Asgns
 (assert (forall ((v Vars)) (= (= v Y) (ASGN v l1))))
 (assert (forall ((v Vars)) (= (= v Z) (ASGN v l2))))
 (assert (NOT_ASGN l3))
