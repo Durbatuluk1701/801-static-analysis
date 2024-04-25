@@ -65,13 +65,12 @@ class Assignment(Statement):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "Assignment(\n%s, \n%s\n"
             % (
-                tabs_plus + self.name.to_str(tabNum + 1),
-                tabs_plus + self.aexp.to_str(tabNum + 1),
+                tabs + "\t" + self.name,
+                self.aexp.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -89,13 +88,12 @@ class Sequence(Statement):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "Sequence(\n%s, \n%s\n"
             % (
-                tabs_plus + self.first.to_str(tabNum + 1),
-                tabs_plus + self.second.tost_str(tabNum + 1),
+                self.first.to_str(tabNum + 1),
+                self.second.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -119,9 +117,13 @@ class Ite(Statement):
             tabs
             + "Ite(\n%s, \n%s, \n%s\n"
             % (
-                tabs_plus + self.condition.to_str(tabNum + 1),
-                tabs_plus + self.true_stmt.to_str(tabNum + 1),
-                tabs_plus + self.false_stmt.to_str(tabNum + 1),
+                self.condition.to_str(tabNum + 1),
+                self.true_stmt.to_str(tabNum + 1),
+                (
+                    self.false_stmt.to_str(tabNum + 1)
+                    if self.false_stmt
+                    else tabs_plus + "None"
+                ),
             )
             + tabs
             + ")"
@@ -143,13 +145,12 @@ class While(Statement):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "While(\n%s, \n%s\n"
             % (
-                tabs_plus + self.condition.to_str(tabNum + 1),
-                tabs_plus + self.body.to_str(tabNum + 1),
+                self.condition.to_str(tabNum + 1),
+                self.body.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -180,13 +181,7 @@ class IntAexp(Aexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
-        return (
-            tabs
-            + "IntAexp(\n%d\n" % (tabs_plus + self.i.to_str(tabNum + 1))
-            + tabs
-            + ")"
-        )
+        return tabs + "IntAexp(%d)" % (self.i)
 
     def eval(self, env):
         return self.i
@@ -198,13 +193,7 @@ class VarAexp(Aexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
-        return (
-            tabs
-            + "VarAexp(\n%s" % (tabs_plus + self.name.toStr(tabNum + 1))
-            + tabs
-            + ")"
-        )
+        return tabs + "VarAexp(%s)" % (self.name)
 
     def eval(self, env):
         if self.name in env:
@@ -221,14 +210,13 @@ class BinopAexp(Aexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "BinopAexp(\n%s, \n%s, \n%s\n"
             % (
-                tabs_plus + self.op.to_str(tabNum + 1),
-                tabs_plus + self.left.to_str(tabNum + 1),
-                tabs_plus + self.right.to_str(tabNum + 1),
+                self.op.to_str(tabNum + 1),
+                self.left.to_str(tabNum + 1),
+                self.right.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -258,13 +246,13 @@ class RelopBexp(Bexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
-            "RelopBexp(\n%s, \n%s, \n%s\n"
+            tabs
+            + "RelopBexp(\n%s, \n%s, \n%s\n"
             % (
-                tabs_plus + self.op.to_str(tabNum + 1),
-                tabs_plus + self.left.to_str(tabNum + 1),
-                tabs_plus + self.right.to_str(tabNum + 1),
+                tabs + "\t" + self.op,
+                self.left.to_str(tabNum + 1),
+                self.right.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -297,13 +285,12 @@ class AndBexp(Bexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "AndBexp(\n%s, \n%s\n"
             % (
-                tabs_plus + self.left.to_str(tabNum + 1),
-                tabs_plus + self.right.to_str(tabNum + 1),
+                self.left.to_str(tabNum + 1),
+                self.right.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -322,13 +309,12 @@ class OrBexp(Bexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
         return (
             tabs
             + "OrBexp(\n%s, \n%s\n"
             % (
-                tabs_plus + self.left.to_str(tabNum + 1),
-                tabs_plus + self.right.to_str(tabNum + 1),
+                self.left.to_str(tabNum + 1),
+                self.right.to_str(tabNum + 1),
             )
             + tabs
             + ")"
@@ -346,10 +332,7 @@ class NotBexp(Bexp):
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
-        tabs_plus = "\t" * (tabNum + 1)
-        return (
-            tabs + "NotBexp(\n%s\n" % (tabs_plus + self.exp.to_str(tabNum)) + tabs + ")"
-        )
+        return tabs + "NotBexp(\n%s\n" % (self.exp.to_str(tabNum)) + tabs + ")"
 
     def eval(self, env):
         value = self.exp.eval(env)
