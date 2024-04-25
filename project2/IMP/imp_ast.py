@@ -109,9 +109,7 @@ class Sequence(Statement):
 
 
 class Ite(Statement):
-    def __init__(
-        self, condition: Bexp, true_stmt: Statement, false_stmt: Statement | None
-    ):
+    def __init__(self, condition: Bexp, true_stmt: Statement, false_stmt: Statement):
         self.condition = condition
         self.true_stmt = true_stmt
         self.false_stmt = false_stmt
@@ -125,11 +123,7 @@ class Ite(Statement):
             % (
                 self.condition.to_str(tabNum + 1),
                 self.true_stmt.to_str(tabNum + 1),
-                (
-                    self.false_stmt.to_str(tabNum + 1)
-                    if self.false_stmt
-                    else tabs_plus + "None"
-                ),
+                self.false_stmt.to_str(tabNum + 1),
             )
             + tabs
             + ")"
