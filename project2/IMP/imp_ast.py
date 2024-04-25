@@ -34,8 +34,10 @@ from IMP.equality import Equality
 class Statement(Equality):
     pass
 
+
 class Aexp(Equality):
     pass
+
 
 # Boolean expressions are the next on our list. There are four kinds of
 # Boolean expressions.
@@ -53,6 +55,7 @@ class Aexp(Equality):
 class Bexp(Equality):
     pass
 
+
 # Next we focus on statements, which can contain both arithmetic and boolean expressions.
 # There are four kinds of statements: assignment, compound, conditional and loops.
 class Assignment(Statement):
@@ -60,24 +63,48 @@ class Assignment(Statement):
         self.name = name
         self.aexp = aexp
 
-    def __repr__(self):
-        return 'Assignment(%s, %s)' % (self.name, self.aexp)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "Assignment(\n%s, \n%s\n"
+            % (
+                tabs_plus + self.name.to_str(tabNum + 1),
+                tabs_plus + self.aexp.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         value = self.aexp.eval(env)
         env[self.name] = value
+
 
 class Sequence(Statement):
     def __init__(self, first, second):
         self.first = first
         self.second = second
 
-    def __repr__(self):
-        return 'Sequence(%s, %s)' % (self.first, self.second)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "Sequence(\n%s, \n%s\n"
+            % (
+                tabs_plus + self.first.to_str(tabNum + 1),
+                tabs_plus + self.second.tost_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         self.first.eval(env)
         self.second.eval(env)
+
 
 class Ite(Statement):
     def __init__(self, condition, true_stmt, false_stmt):
@@ -85,8 +112,20 @@ class Ite(Statement):
         self.true_stmt = true_stmt
         self.false_stmt = false_stmt
 
-    def __repr__(self):
-        return 'Ite(%s, %s, %s)' % (self.condition, self.true_stmt, self.false_stmt)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "Ite(\n%s, \n%s, \n%s\n"
+            % (
+                tabs_plus + self.condition.to_str(tabNum + 1),
+                tabs_plus + self.true_stmt.to_str(tabNum + 1),
+                tabs_plus + self.false_stmt.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         condition_value = self.condition.eval(env)
@@ -96,13 +135,25 @@ class Ite(Statement):
             if self.false_stmt:
                 self.false_stmt.eval(env)
 
+
 class While(Statement):
     def __init__(self, condition, body):
         self.condition = condition
         self.body = body
 
-    def __repr__(self):
-        return 'While(%s, %s)' % (self.condition, self.body)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "While(\n%s, \n%s\n"
+            % (
+                tabs_plus + self.condition.to_str(tabNum + 1),
+                tabs_plus + self.body.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         condition_value = self.condition.eval(env)
@@ -110,32 +161,50 @@ class While(Statement):
             self.body.eval(env)
             condition_value = self.condition.eval(env)
 
-class Skip():
+
+class Skip:
     def __init__(self):
         pass
 
-    def __repr__(self):
-        return 'Skip'
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        return tabs + "Skip"
 
     def eval(self, env):
         pass
+
 
 class IntAexp(Aexp):
     def __init__(self, i):
         self.i = i
 
-    def __repr__(self):
-        return 'IntAexp(%d)' % self.i
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "IntAexp(\n%d\n" % (tabs_plus + self.i.to_str(tabNum + 1))
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         return self.i
+
 
 class VarAexp(Aexp):
     def __init__(self, name):
         self.name = name
 
-    def __repr__(self):
-        return 'VarAexp(%s)' % self.name
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "VarAexp(\n%s" % (tabs_plus + self.name.toStr(tabNum + 1))
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         if self.name in env:
@@ -143,29 +212,43 @@ class VarAexp(Aexp):
         else:
             return 0
 
+
 class BinopAexp(Aexp):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return 'BinopAexp(%s, %s, %s)' % (self.op, self.left, self.right)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "BinopAexp(\n%s, \n%s, \n%s\n"
+            % (
+                tabs_plus + self.op.to_str(tabNum + 1),
+                tabs_plus + self.left.to_str(tabNum + 1),
+                tabs_plus + self.right.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         left_value = self.left.eval(env)
         right_value = self.right.eval(env)
-        if self.op == '+':
+        if self.op == "+":
             value = left_value + right_value
-        elif self.op == '-':
+        elif self.op == "-":
             value = left_value - right_value
-        elif self.op == '*':
+        elif self.op == "*":
             value = left_value * right_value
-        elif self.op == '/':
+        elif self.op == "/":
             value = left_value / right_value
         else:
-            raise RuntimeError('unknown operator: ' + self.op)
+            raise RuntimeError("unknown operator: " + self.op)
         return value
+
 
 class RelopBexp(Bexp):
     def __init__(self, op, left, right):
@@ -173,60 +256,100 @@ class RelopBexp(Bexp):
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return 'RelopBexp(%s, %s, %s)' % (self.op, self.left, self.right)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            "RelopBexp(\n%s, \n%s, \n%s\n"
+            % (
+                tabs_plus + self.op.to_str(tabNum + 1),
+                tabs_plus + self.left.to_str(tabNum + 1),
+                tabs_plus + self.right.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         left_value = self.left.eval(env)
         right_value = self.right.eval(env)
-        if self.op == '<':
+        if self.op == "<":
             value = left_value < right_value
-        elif self.op == '<=':
+        elif self.op == "<=":
             value = left_value <= right_value
-        elif self.op == '>':
+        elif self.op == ">":
             value = left_value > right_value
-        elif self.op == '>=':
+        elif self.op == ">=":
             value = left_value >= right_value
-        elif self.op == '=':
+        elif self.op == "=":
             value = left_value == right_value
-        elif self.op == '!=':
+        elif self.op == "!=":
             value = left_value != right_value
         else:
-            raise RuntimeError('unknown operator: ' + self.op)
+            raise RuntimeError("unknown operator: " + self.op)
         return value
+
 
 class AndBexp(Bexp):
     def __init__(self, left, right):
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return 'AndBexp(%s, %s)' % (self.left, self.right)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "AndBexp(\n%s, \n%s\n"
+            % (
+                tabs_plus + self.left.to_str(tabNum + 1),
+                tabs_plus + self.right.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         left_value = self.left.eval(env)
         right_value = self.right.eval(env)
         return left_value and right_value
 
+
 class OrBexp(Bexp):
     def __init__(self, left, right):
         self.left = left
         self.right = right
 
-    def __repr__(self):
-        return 'OrBexp(%s, %s)' % (self.left, self.right)
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs
+            + "OrBexp(\n%s, \n%s\n"
+            % (
+                tabs_plus + self.left.to_str(tabNum + 1),
+                tabs_plus + self.right.to_str(tabNum + 1),
+            )
+            + tabs
+            + ")"
+        )
 
     def eval(self, env):
         left_value = self.left.eval(env)
         right_value = self.right.eval(env)
         return left_value or right_value
 
+
 class NotBexp(Bexp):
     def __init__(self, exp):
         self.exp = exp
 
-    def __repr__(self):
-        return 'NotBexp(%s)' % self.exp
+    def to_str(self, tabNum):
+        tabs = "\t" * tabNum
+        tabs_plus = "\t" * (tabNum + 1)
+        return (
+            tabs + "NotBexp(\n%s\n" % (tabs_plus + self.exp.to_str(tabNum)) + tabs + ")"
+        )
 
     def eval(self, env):
         value = self.exp.eval(env)
