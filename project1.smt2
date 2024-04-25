@@ -119,7 +119,6 @@
 (assert (forall ((l Lines)) (iff (= l l5) (Flows l4 l))))
 (assert (forall ((l Lines)) (iff (or (= l l6) (= l l3)) (Flows l5 l))))
 (assert (forall ((l Lines)) (not (Flows l6 l))))
-(assert (forall ((l_1 Lines) (l_2 Lines)) (implies (Flows l_1 l_2) (not (= l_1 l_2)))))
 ;;;;;; ASGNs
 ;;;; Program Asgns
 (assert (forall ((v Vars)) (= (= v Y) (ASGN v l1))))
@@ -135,7 +134,6 @@
 (push)
 ; Q1
 (assert (forall ((l Lines)) (= (= l l?) (EX l6 (mk-pair X l)))))
-(check-sat)
 ; Q2
 (assert (forall ((l Lines)) (= (or (= l l2) (= l l4)) (EN l6 (mk-pair Z l)))))
 ; Q3
@@ -146,6 +144,7 @@
 (assert (not (exists ((l Lines)) (forall ((l_orig Lines)) (implies (not (= l_orig l?)) (EX l (mk-pair X l_orig)))))))
 (assert (forall ((l Lines)) (EX l (mk-pair X l?))))
 (assert (forall ((l Lines) (l_orig Lines)) (iff (= l_orig l?) (EX l (mk-pair X l_orig)))))
+(echo "Checking that an initial model exists to solve the questions")
 (check-sat)
 (pop)
 
@@ -195,4 +194,3 @@
 (check-sat)
 (pop)
 (echo "")
- 
