@@ -36,7 +36,8 @@ class Statement(Equality):
 
 
 class Aexp(Equality):
-    pass
+    def eval(self, env) -> int:
+        raise Exception("Not implemented")
 
 
 # Boolean expressions are the next on our list. There are four kinds of
@@ -53,17 +54,20 @@ class Aexp(Equality):
 #
 #                                   X < 10 and 30
 class Bexp(Equality):
+    def eval(self, env) -> bool:
+        raise Exception("Not implemented")
+
     pass
 
 
 # Next we focus on statements, which can contain both arithmetic and boolean expressions.
 # There are four kinds of statements: assignment, compound, conditional and loops.
 class Assignment(Statement):
-    def __init__(self, name, aexp):
+    def __init__(self, name: str, aexp: Aexp):
         self.name = name
         self.aexp = aexp
 
-    def to_str(self, tabNum):
+    def to_str(self, tabNum: int):
         tabs = "\t" * tabNum
         return (
             tabs
@@ -82,7 +86,7 @@ class Assignment(Statement):
 
 
 class Sequence(Statement):
-    def __init__(self, first, second):
+    def __init__(self, first: Statement, second: Statement):
         self.first = first
         self.second = second
 
@@ -105,7 +109,9 @@ class Sequence(Statement):
 
 
 class Ite(Statement):
-    def __init__(self, condition, true_stmt, false_stmt):
+    def __init__(
+        self, condition: Bexp, true_stmt: Statement, false_stmt: Statement | None
+    ):
         self.condition = condition
         self.true_stmt = true_stmt
         self.false_stmt = false_stmt
@@ -139,7 +145,7 @@ class Ite(Statement):
 
 
 class While(Statement):
-    def __init__(self, condition, body):
+    def __init__(self, condition: Bexp, body: Statement):
         self.condition = condition
         self.body = body
 
@@ -176,7 +182,7 @@ class Skip:
 
 
 class IntAexp(Aexp):
-    def __init__(self, i):
+    def __init__(self, i: int):
         self.i = i
 
     def to_str(self, tabNum):
@@ -188,7 +194,7 @@ class IntAexp(Aexp):
 
 
 class VarAexp(Aexp):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
 
     def to_str(self, tabNum):
@@ -203,7 +209,7 @@ class VarAexp(Aexp):
 
 
 class BinopAexp(Aexp):
-    def __init__(self, op, left, right):
+    def __init__(self, op: str, left: Aexp, right: Aexp):
         self.op = op
         self.left = left
         self.right = right
@@ -214,7 +220,7 @@ class BinopAexp(Aexp):
             tabs
             + "BinopAexp(\n%s, \n%s, \n%s\n"
             % (
-                self.op.to_str(tabNum + 1),
+                tabs + "\t" + self.op,
                 self.left.to_str(tabNum + 1),
                 self.right.to_str(tabNum + 1),
             )
@@ -239,7 +245,7 @@ class BinopAexp(Aexp):
 
 
 class RelopBexp(Bexp):
-    def __init__(self, op, left, right):
+    def __init__(self, op: str, left: Bexp, right: Bexp):
         self.op = op
         self.left = left
         self.right = right
@@ -279,7 +285,7 @@ class RelopBexp(Bexp):
 
 
 class AndBexp(Bexp):
-    def __init__(self, left, right):
+    def __init__(self, left: Bexp, right: Bexp):
         self.left = left
         self.right = right
 
@@ -303,7 +309,7 @@ class AndBexp(Bexp):
 
 
 class OrBexp(Bexp):
-    def __init__(self, left, right):
+    def __init__(self, left: Bexp, right: Bexp):
         self.left = left
         self.right = right
 
@@ -327,7 +333,7 @@ class OrBexp(Bexp):
 
 
 class NotBexp(Bexp):
-    def __init__(self, exp):
+    def __init__(self, exp: Bexp):
         self.exp = exp
 
     def to_str(self, tabNum):

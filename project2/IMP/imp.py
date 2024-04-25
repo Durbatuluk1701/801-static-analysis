@@ -13,8 +13,10 @@ import sys
 
 from IMP.imp_lexer import imp_lex
 from IMP.imp_parser import imp_parse
+from IMP.imp_ast import Statement
 
-def create_ast(filename):
+
+def create_ast(filename) -> Statement:
     # Read target program
     text = open(filename).read()
     # Tokenize program
@@ -22,7 +24,7 @@ def create_ast(filename):
     # Attempt to consume tokens and build parse tree
     parse_result = imp_parse(tokens)
     if not parse_result:
-        sys.stderr.write('Parse error!\n')
+        sys.stderr.write("Parse error!\n")
         sys.exit(1)
     # Build AST from parsed result to determine how to run target program
     ast = parse_result.value
