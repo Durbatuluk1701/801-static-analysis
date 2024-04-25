@@ -29,9 +29,21 @@
 #     are the same, to help with testing.
 
 from IMP.equality import Equality
+from enum import Enum
+
+
+class StatementType(Enum):
+    ITE = "ITE"
+    WHILE = "WHILE"
+    ASSIGN = "ASSIGN"
+    SKIP = "SKIP"
+    SEQ = "SEQ"
 
 
 class Statement(Equality):
+    def type(self) -> StatementType:
+        raise Exception("Not implemented")
+
     pass
 
 
@@ -67,6 +79,9 @@ class Assignment(Statement):
         self.name = name
         self.aexp = aexp
 
+    def type(self):
+        return StatementType.ASSIGN
+
     def to_str(self, tabNum: int):
         tabs = "\t" * tabNum
         return (
@@ -89,6 +104,9 @@ class Sequence(Statement):
     def __init__(self, first: Statement, second: Statement):
         self.first = first
         self.second = second
+
+    def type(self) -> StatementType:
+        return StatementType.SEQ
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
@@ -115,6 +133,9 @@ class Ite(Statement):
         self.condition = condition
         self.true_stmt = true_stmt
         self.false_stmt = false_stmt
+
+    def type(self):
+        return StatementType.ITE
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
@@ -149,6 +170,9 @@ class While(Statement):
         self.condition = condition
         self.body = body
 
+    def type(self) -> StatementType:
+        return StatementType.WHILE
+
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
         return (
@@ -169,9 +193,12 @@ class While(Statement):
             condition_value = self.condition.eval(env)
 
 
-class Skip:
+class Skip(Statement):
     def __init__(self):
         pass
+
+    def type(self) -> StatementType:
+        return StatementType.SKIP
 
     def to_str(self, tabNum):
         tabs = "\t" * tabNum
