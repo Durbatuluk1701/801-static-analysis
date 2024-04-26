@@ -1,6 +1,7 @@
 import sys
 from IMP.imp import create_ast
 from IMP.imp_ast import *
+import subprocess
 
 PREAMBLE = """
 (declare-datatypes (T1 T2) ((Pair (mk-pair (first T1) (second T2)))))
@@ -271,6 +272,7 @@ def main():
     # print(ast.to_str(0))
     with open(out_file_path, "w") as fd:
         fd.write(generate_model_top(ast))
+    subprocess.run(["z3", out_file_path])
     print("Done")
 
 

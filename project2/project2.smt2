@@ -1,4 +1,4 @@
-(declare-datatypes () ((Vars X Y Z)))
+(declare-datatypes () ((Vars Z Y X)))
 (declare-datatypes () ((Lines l? l1 l2 l3 l4 l5 l6 l7)))
 
 (declare-datatypes (T1 T2) ((Pair (mk-pair (first T1) (second T2)))))
