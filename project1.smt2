@@ -115,7 +115,8 @@
 (assert (forall ((l Lines)) (iff (= l l2) (Flows l1 l))))
 (assert (forall ((l Lines)) (iff (= l l3) (Flows l2 l))))
 (assert (forall ((l Lines)) (iff (or (= l l4) (= l l6)) (Flows l3 l))))
-(assert (forall ((l Lines)) (iff (or (= l l2) (= l l5)) (Flows l l3))))
+; TODO: This below line is not necessary I believe
+; (assert (forall ((l Lines)) (iff (or (= l l2) (= l l5)) (Flows l l3))))
 (assert (forall ((l Lines)) (iff (= l l5) (Flows l4 l))))
 (assert (forall ((l Lines)) (iff (or (= l l6) (= l l3)) (Flows l5 l))))
 (assert (forall ((l Lines)) (not (Flows l6 l))))

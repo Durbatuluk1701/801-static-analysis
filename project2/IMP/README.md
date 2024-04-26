@@ -21,4 +21,7 @@ with the following comments
 > - Add skip statements
 
 This directory is a basic IMP (the toy programming language) parser.
-I have not currently made any modifications off of Zach Bruennigs changes.
+I have made modifications to the parser to include more strict typing
+for python, as well as changing the default parsing semantics for 
+If Then Else statements to default to an else branch of Skip in the case
+that one is not provided.
